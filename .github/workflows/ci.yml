@@ -1,11 +1,12 @@
-name: CI
+name: CI/CD
 
 on:
   push:
+    branches: ["main"]
   pull_request:
 
 jobs:
-  run:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,3 +27,22 @@ jobs:
       - name: Run script
         run: |
           python main.py
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create zip
+        run: |
+          zip -r project.zip .
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-build
+          path: project.zip
